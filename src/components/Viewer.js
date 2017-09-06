@@ -1,37 +1,77 @@
 import React from 'react';
+import Image from './Image';
+import Video from './Video';
 
- class Viewer extends React.Component {
+class Viewer extends React.Component {
 
     constructor(props){
         super(props);
 
         this.state = {
-            src:"http://daler.ru/pictures/1/2560x1600/Zakat-na-beregu-morya-9413.jpg"
+            data: null,
+            visible: false
         }
     }
+
+    componentWillMount(){
+         //отображаем новый элемент
+         this.props.emitter.on('UPDATE_VIEW', (elem) => {
+             this.updateView(elem)
+         });
+    }
+
     render(){
+        const arrowStyle = {
+            opacity: +this.state.visible
+        };
+
+        let component =  null;
+
+        if (this.state.data != null)
+        if (this.state.data.type === "image"){
+            component = <Image url = {this.state.data.url} />;
+        } else if (this.state.data.type === "video") {
+            component = <Video url = {this.state.data.url} />
+        }
+
         return (
-            <div id="viewer">
-                <div className ="arrow arrow_left" id="viewer_left">
-                </div>
-                <div className ="arrow arrow_right" id="viewer_right">
-                </div>
+            <div id="viewer" onMouseOver = {this.onMouseOver} onMouseLeave = {this.onMouseLeave}>
+                <div className ="arrow arrow_left"  style={arrowStyle} onClick = {this.getPrevThumbnail.bind(this)}></div>
+
+                <div className ="arrow arrow_right" style={arrowStyle} onClick = {this.getNextThumbnail.bind(this)}></div>
 
                 <div className ="explore_zone">
-                    <img src={this.state.src}/>
+                    {component}
                 </div>
             </div>
         );
     }
-     componentWillMount(){
-        const context = this;
-         this.props.emitter.on('UPDATE_VIEW', function(src){
-             console.log('UPDATE_VIEW', src);
-             context.updateView(src)
-         });
-     }
-    updateView(url){
-        this.setState({src:url});
+
+    updateView(elem){
+        this.setState({
+            data: elem
+        });
+    }
+
+    //отобразить стрелки прокрутки
+    onMouseOver = () => {
+        this.setState({
+            visible: true
+        });
+    }
+    //спрятать полосы прокрутки
+    onMouseLeave = () => {
+        this.setState({
+            visible: false
+        });
+    }
+    getNextThumbnail(){
+        const currentId = this.state.data.id;
+        this.props.emitter.emit('VIEW_ANOTHER', currentId + 1);
+    }
+    getPrevThumbnail(){
+        const currentId = this.state.data.id;
+        this.props.emitter.emit('VIEW_ANOTHER', currentId - 1);
     }
 }
 export default Viewer;

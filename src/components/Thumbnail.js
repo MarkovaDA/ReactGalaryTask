@@ -5,18 +5,29 @@ class Thumbnail extends React.Component{
 
     constructor(props){
         super(props);
+        /*this.props.data = {number, url, type, id}*/
+        //TODO: number заменить на индекс
     }
 
     render(){
-        var itemStyle = {
-            left: this.props.number*120
+        const itemStyle = {
+            left: this.props.data.number*120
+        };
+        let src =  null;
+
+        if (this.props.data.type ==="image"){
+            src = this.props.data.url;
+        } else if (this.props.data.type ==="video") {
+            //единая иконка для изображений
+            src = require("../images/video_icon.png");
         }
+
         return (
-                <div className ="item" style={itemStyle} onClick = {this.props.clickHandler(this.props.number)}>
-                    <img src={this.props.url}/>
+                <div className ="item" style={itemStyle} type={this.props.data.type}
+                     onClick = {this.props.clickHandler(this.props.data.id)}>
+                    <img src={src} />
                 </div>
         );
-
     }
 }
 export default Thumbnail;
